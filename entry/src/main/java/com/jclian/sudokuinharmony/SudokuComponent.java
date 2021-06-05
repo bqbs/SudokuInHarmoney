@@ -62,7 +62,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
 
     public SudokuComponent(Context context, AttrSet attrSet) {
         super(context, attrSet);
-        // 自定义属性。获取前，调用.isPresent()判断是否能
+        // 自定义属性。获取前，调用isPresent()判断是否能正常取值
         if (attrSet.getAttr("textColor_highlight").isPresent()) {
             highLightTextColor = attrSet.getAttr("textColor_highlight").get().getColorValue();
         }
