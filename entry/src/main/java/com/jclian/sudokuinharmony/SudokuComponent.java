@@ -367,15 +367,15 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
                 boolean isPin = initData.containsKey(key);
                 if (posX != -1 && posY != -1) {
                     if (event.getAction() == TouchEvent.PRIMARY_POINT_DOWN) {
-                        if (menuNum == temp) {
+                        if (menuNum == temp || temp == 10) {
                             menuNum = -1;
                         } else {
                             menuNum = temp;
                         }
                         if (!isPin) {
                             String lkey = posX + "," + posY;
-                            if (menuNum == -1 || (fillData.containsKey(key) && fillData.get(lkey) == menuNum)) {
-                                fillData.remove(key);
+                            if (menuNum == -1 || (fillData.containsKey(lkey) && fillData.get(lkey) == menuNum)) {
+                                fillData.remove(lkey);
                             } else {
                                 fillData.put(lkey, temp);
                             }
