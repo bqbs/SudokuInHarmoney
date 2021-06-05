@@ -5,16 +5,15 @@ import com.google.gson.reflect.TypeToken;
 import ohos.agp.components.AttrSet;
 import ohos.agp.components.Component;
 import ohos.agp.components.DragEvent;
-import ohos.agp.render.Canvas;
-import ohos.agp.render.Paint;
-import ohos.agp.render.Path;
-import ohos.agp.render.PathEffect;
+import ohos.agp.render.*;
 import ohos.agp.utils.*;
+import ohos.agp.window.dialog.ToastDialog;
 import ohos.app.Context;
 import ohos.data.DatabaseHelper;
 import ohos.data.preferences.Preferences;
 import ohos.hiviewdfx.HiLog;
 import ohos.hiviewdfx.HiLogLabel;
+import ohos.multimodalinput.event.MmiPoint;
 import ohos.multimodalinput.event.TouchEvent;
 
 import java.lang.reflect.Type;
@@ -23,16 +22,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.jclian.sudokuinharmony.BuildConfig.DEBUG;
 import static ohos.app.Context.MODE_PRIVATE;
 
 public class SudokuComponent extends Component implements Component.DrawTask, Component.EstimateSizeListener, Component.TouchEventListener {
 
-    private Color highLightTextColor = new Color(0x191919);
-    private Color fillTextColor = new Color(0xd6d6d6);
-    private Color pinedTextColor = new Color(0xa0a0a0);
-    private Color selectedCircleColor = new Color(0x9c915d);
-    private Color pinedCircleColor = new Color(0x2d2d2d);
-    private Color highlightCircleColor = new Color(0x666355);
+    private Color highLightTextColor = new Color(Color.getIntColor("#191919"));
+    private Color fillTextColor = new Color(Color.getIntColor("#d6d6d6"));
+    private Color pinedTextColor = new Color(Color.getIntColor("#a0a0a0"));
+    private Color selectedCircleColor = new Color(Color.getIntColor("#9c915d"));
+    private Color pinedCircleColor = new Color(Color.getIntColor("#2d2d2d"));
+    private Color highlightCircleColor = new Color(Color.getIntColor("#666355"));
 
     private float yBtmFun = -1f;
     private float wBtmFun = -1f;
@@ -62,14 +62,20 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
 
     public SudokuComponent(Context context, AttrSet attrSet) {
         super(context, attrSet);
-        //0x191919
-        highLightTextColor = attrSet.getAttr("textColor_highlight").get().getColorValue();
-        pinedTextColor = attrSet.getAttr("textColor_pined").get().getColorValue();
-        fillTextColor = attrSet.getAttr("textColor_fill").get().getColorValue();
+        // 自定义属性。获取前，调用.isPresent()判断是否能
+        if (attrSet.getAttr("textColor_highlight").isPresent()) {
+            highLightTextColor = attrSet.getAttr("textColor_highlight").get().getColorValue();
+        }
+        if (attrSet.getAttr("textColor_pined").isPresent()) {
+            pinedTextColor = attrSet.getAttr("textColor_pined").get().getColorValue();
+        }
+        if (attrSet.getAttr("textColor_fill").isPresent()) {
+            fillTextColor = attrSet.getAttr("textColor_fill").get().getColorValue();
+        }
 
         setEstimateSizeListener(this);
-        addDrawTask(this);
         setTouchEventListener(this);
+        addDrawTask(this);
 
     }
 
@@ -80,6 +86,8 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
 
     @Override
     public void onDraw(Component component, Canvas canvas) {
+        HiLog.debug(LABEL_LOG, "onDraw");
+        canvas.drawColor(highLightTextColor.getValue(), BlendMode.SRC);
         drawLines(canvas);
         drawCells(canvas);
         drawNumPad(canvas);
@@ -91,13 +99,13 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
     private void drawLines(Canvas canvas) {
         Path dashPath = new Path();
         Paint paint = new Paint();
-        paint.setColor(new Color(0x9c915d));
+        paint.setColor(new Color(Color.getIntColor("#9c915d")));
         paint.setStrokeWidth(2f);
         paint.setStyle(Paint.Style.STROKE_STYLE);
 
         Paint dashPaint = new Paint();
         dashPaint.setStrokeWidth(2f);
-        dashPaint.setColor((new Color(0x2f2e2b)));
+        paint.setColor(new Color(Color.getIntColor("#2f2e2b")));
         dashPaint.setStyle(Paint.Style.STROKE_STYLE);
         dashPaint.setPathEffect(new PathEffect(new float[]{wBlock * 0.6f, wBlock * 0.4f}, wBlock * -0.2f));
 
@@ -202,16 +210,16 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
                 text = String.valueOf(num);
             }
 
-            float left = (num - 1) % 5f / 5f * getWidth();
-            float top = ((num - 1) / 5f) * getWidth() / 5f + getWidth();
+            float left = (num - 1) % 5 / 5f * getWidth();
+            float top = ((num - 1) / 5) * getWidth() / 5f + getWidth();
             float textHeight = paint.descent() - paint.ascent();
             float textOffset = textHeight / 2 - paint.descent();
             RectFloat bounds = new RectFloat(left, top, left + wMenu, top + wMenu);
             if (menuNum == num) {
-                paint.setColor(new Color(0x9c915d));
+                paint.setColor(new Color(Color.getIntColor("#9c915d")));
                 paint.setStyle(Paint.Style.FILLANDSTROKE_STYLE);
                 canvas.drawCircle(bounds.getCenter().getPointX(), bounds.getCenter().getPointY(), menuCircleRadius, paint);
-                paint.setColor(new Color(0xFFFFFF));
+                paint.setColor(new Color(Color.getIntColor("#FFFFFF")));
                 canvas.drawText(paint, text, bounds.getCenter().getPointX(), bounds.getCenter().getPointY() + textOffset);
             } else {
                 paint.setColor(Color.WHITE);
@@ -233,6 +241,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
      * 数独初始化
      */
     public void start() {
+        HiLog.debug(LABEL_LOG, "start");
         DatabaseHelper helper = new DatabaseHelper(getContext());
         Preferences sp = helper.getPreferences("dump_sudoku");
         String initJson = sp.getString("initdata", null);
@@ -259,7 +268,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
         }
         fillData.putAll(fillMap);
 
-
+        invalidate();
     }
 
 
@@ -267,6 +276,8 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
      * 缓存数度
      */
     public void dump() {
+        HiLog.debug(LABEL_LOG, "dump");
+
         Type type = new TypeToken<HashMap<String, Integer>>() {
         }.getType();
         String puzzleStr = new Gson().toJson(initData, type);
@@ -288,7 +299,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
         HiLog.debug(LABEL_LOG, "", "");
         wBlock = width / 9;
         hBlock = wBlock;
-        HiLog.debug(LABEL_LOG, "block width =$wBlock , height = $hBlock");
+        HiLog.debug(LABEL_LOG, "block width =" + wBlock + ",height =" + hBlock);
         wMenu = width / 5f;
         menuCircleRadius = wMenu / 2 * 0.8f;
         yBtmFun = width + wMenu * 2;
@@ -296,24 +307,123 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
         return true;
     }
 
+    @Override
+    public boolean onTouchEvent(Component component, TouchEvent event) {
+        if (event.getAction() == TouchEvent.POINT_MOVE) {
+            return false;
+        }
+        // 点击的位置
+        MmiPoint position = event.getPointerPosition(0);
+        int width = getWidth();
+        if (position.getY() < getWidth()) {
+            // 九宫区域
+            if (event.getAction() == TouchEvent.PRIMARY_POINT_DOWN) {
+                int x = (int) (position.getX() / (width / 9));
+                int y = (int) (position.getY() / (width / 9));
 
-    private int getMySize(int measureSpec) {
-        int mode = EstimateSpec.getMode(measureSpec);
-        int size = EstimateSpec.getSize(measureSpec);
-        if (mode == EstimateSpec.NOT_EXCEED) {
-            return size;
+                String key = x + "," + y;
 
-        } else if (mode == EstimateSpec.PRECISE) {
-            return size;
-        } else if (mode == EstimateSpec.UNCONSTRAINT) {
-            return size;
+                boolean isPin = initData.containsKey(key);
+
+                if (menuNum != -1) {
+                    if (!isPin) {
+                        if (fillData.containsKey(key)) {
+                            fillData.remove(key);
+                        } else {
+                            fillData.put(key, menuNum);
+                        }
+                    }
+                } else {
+                    if (x == posX && y == posY) {
+                        posX = -1;
+                        posY = -1;
+                    } else {
+                        posX = x;
+                        posY = y;
+                    }
+                }
+
+                if (DEBUG) {
+                    HiLog.debug(LABEL_LOG, "event = " + event + ", posX =" + posX + " posY = " + posY);
+                }
+            }
+        } else if (position.getY() > width && position.getY() < width + 2f * wMenu) {
+            // 触摸区域在功能菜单
+            int y = (int) ((position.getY() - width) / wMenu);
+            int x = (int) (position.getX() / wMenu);
+            float left = wMenu * x;
+            float right = (wMenu * (x + 1));
+            float top = (y * wMenu + width);
+            float bottom = ((y + 1) * wMenu + width);
+            RectFloat rect = new RectFloat(left, top, right, bottom);
+            // 通过计算触摸点距离圆心距离，确定触摸点是否在圆内
+            boolean isInside = Math.pow((position.getX() - rect.getCenter().getPointX()), 2) + Math.pow((position.getY() - rect.getCenter().getPointY())
+                    , 2) <= Math.pow(menuCircleRadius, 2);
+            if (isInside) {
+                //在圆形菜单内
+                int temp = x + 5 * y + 1;
+                String key = posX + "," + posY;
+
+                boolean isPin = initData.containsKey(key);
+                if (posX != -1 && posY != -1) {
+                    if (event.getAction() == TouchEvent.PRIMARY_POINT_DOWN) {
+                        if (menuNum == temp) {
+                            menuNum = -1;
+                        } else {
+                            menuNum = temp;
+                        }
+                        if (!isPin) {
+                            String lkey = posX + "," + posY;
+                            if (menuNum == -1 || (fillData.containsKey(key) && fillData.get(lkey) == menuNum)) {
+                                fillData.remove(key);
+                            } else {
+                                fillData.put(lkey, temp);
+                            }
+                        }
+                    } else if (event.getAction() == TouchEvent.PRIMARY_POINT_UP) {
+                        menuNum = -1;
+                    }
+                } else {
+                    if (event.getAction() == TouchEvent.PRIMARY_POINT_UP) {
+                        if (menuNum == temp) {
+                            menuNum = -1;
+                        } else {
+                            menuNum = temp;
+                        }
+                    }
+                }
+
+            }
+        }
+        if (event.getAction() == TouchEvent.PRIMARY_POINT_UP) {
+            if ((fillData.size() + initData.size()) >= 81) {
+                Map<String, Integer> solvedData = new HashMap<String, Integer>();
+                solvedData.putAll(initData);
+                solvedData.putAll(fillData);
+                if (solvedData.size() >= 81) {
+                    checkSudoku(solvedData);
+                }
+            }
+        }
+        invalidate();
+
+        return true;
+    }
+
+
+    private void checkSudoku(Map<String, Integer> data) {
+        if (Sudoku.check(data)) {
+            new ToastDialog(getContext())
+                    .setText(getContext().getString(ResourceTable.String_solved))
+                    .setAlignment(LayoutAlignment.CENTER)
+                    .show();
         } else {
-            return DEFAULT_SIZE;
+            new ToastDialog(getContext())
+                    .setText(getContext().getString(ResourceTable.String_un_solved))
+                    .setAlignment(LayoutAlignment.CENTER)
+                    .show();
+
         }
     }
 
-    @Override
-    public boolean onTouchEvent(Component component, TouchEvent touchEvent) {
-        return false;
-    }
 }

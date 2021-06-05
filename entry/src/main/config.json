@@ -40,7 +40,7 @@
         "name": "com.jclian.sudokuinharmony.MainAbility",
         "icon": "$media:icon",
         "description": "$string:mainability_description",
-        "label": "SudokuInHarmony",
+        "label": "$string:app_name",
         "type": "page",
         "launchType": "standard"
       }

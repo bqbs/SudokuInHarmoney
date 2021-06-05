@@ -1,5 +1,7 @@
 package com.jclian.sudokuinharmony;
 
+import java.util.Objects;
+
 public class CrossCycleLinkNode<T> {
     CrossCycleLinkNode<T> up = this;
     CrossCycleLinkNode<T> down = this;

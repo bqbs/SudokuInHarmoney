@@ -11,6 +11,14 @@
     {
       "name": "HelloWorld",
       "value": "Hello World"
+    },
+    {
+      "name": "solved",
+      "value": "Solved"
+    },
+    {
+      "name": "un_solved",
+      "value": "Wrong Answer."
     }
   ]
 }

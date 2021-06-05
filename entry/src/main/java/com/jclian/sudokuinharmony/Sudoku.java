@@ -9,7 +9,7 @@ import java.util.function.Function;
  * https://zhuanlan.zhihu.com/p/67447747
  * 数独的求解用上了Dance Link X算法，知乎大神也做了解释
  * https://zhuanlan.zhihu.com/p/67324277
- * *
+ *
  * 下面使用kotlin，转写了一下
  */
 public class Sudoku {
@@ -142,8 +142,8 @@ public class Sudoku {
         CrossCycleLinkNode<String> last = null;
         CrossCycleLinkNode<String> col = head.right;
         for (String num : list) {
-            while (col != head) {
-                if (col.mValue == num) {
+            while (!col .equals(head)) {
+                if (col.mValue .equals(num) ) {
                     CrossCycleLinkNode<String> node = new CrossCycleLinkNode<>(String.valueOf(1), row_id);
                     node.col = col;
                     node.down = col;
@@ -169,13 +169,13 @@ public class Sudoku {
     }
 
     static boolean danceLinkX(CrossCycleLinkNode<String> head, List<String> answers) {
-        if (head.right == head) {
+        if (head.right .equals(head) ) {
             return true;
         }
 
         CrossCycleLinkNode<String> node = head.right;
-        while (node != head) {
-            if (node.down == node) {
+        while (!node .equals(head) ) {
+            if (node.down == node ) {
                 return false;
             }
             node = node.right;
@@ -188,8 +188,8 @@ public class Sudoku {
         restores.add(restoreColumn);
 
         node = firstCol.down;
-        while (node != firstCol) {
-            if (node.right != node) {
+        while (!node.equals(firstCol) ) {
+            if (!node.right .equals(node)) {
                 node.right.removeRow();
                 restores.add(node.right::restoreRow);
             }
@@ -197,24 +197,24 @@ public class Sudoku {
         }
         int curRestoresCount = restores.size() ;
         CrossCycleLinkNode<String> selectedRow = firstCol.down;
-        while (selectedRow != firstCol) {
+        while (!selectedRow .equals(firstCol)) {
             answers.add(selectedRow.mRow);
-            if (selectedRow.right != selectedRow) {
+            if (!selectedRow.right .equals(selectedRow)) {
                 CrossCycleLinkNode<String> rowNode = selectedRow.right;
                 while (true) {
                     CrossCycleLinkNode<String> colNode = rowNode.col;
                     colNode.removeColumn();
                     restores.add(colNode::restoreColumn);
                     colNode = colNode.down;
-                    while (colNode != colNode.col) {
-                        if (colNode.right != colNode) {
+                    while (!colNode .equals(colNode.col)) {
+                        if (!colNode.right.equals(colNode)) {
                             colNode.right.removeRow();
                             restores.add(colNode.right::restoreRow);
                         }
                         colNode = colNode.down;
                     }
                     rowNode = rowNode.right;
-                    if (rowNode == selectedRow.right) {
+                    if (rowNode.equals(selectedRow.right)) {
                         break;
                     }
                 }
