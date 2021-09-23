@@ -16,6 +16,13 @@ buildscript {
         maven {
             url 'https://developer.huawei.com/repo/'
         }
+        maven {
+            url = uri("https://maven.pkg.github.com/bqbs/SudokuLib")
+            credentials {
+                username = "public"
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
         jcenter()
     }
     dependencies {
@@ -31,6 +38,13 @@ allprojects {
         }
         maven {
             url 'https://developer.huawei.com/repo/'
+        }
+        maven {
+            url = uri("https://maven.pkg.github.com/bqbs/SudokuLib")
+            credentials {
+                username = "public"
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
         jcenter()
     }

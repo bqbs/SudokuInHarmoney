@@ -2,6 +2,7 @@ package com.jclian.sudokuinharmony;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.jclian.libsudoku.Sudoku;
 import ohos.agp.components.AttrSet;
 import ohos.agp.components.Component;
 import ohos.agp.components.DragEvent;
@@ -17,13 +18,10 @@ import ohos.multimodalinput.event.MmiPoint;
 import ohos.multimodalinput.event.TouchEvent;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.jclian.sudokuinharmony.BuildConfig.DEBUG;
-import static ohos.app.Context.MODE_PRIVATE;
 
 public class SudokuComponent extends Component implements Component.DrawTask, Component.EstimateSizeListener, Component.TouchEventListener {
 
@@ -211,7 +209,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
             }
 
             float left = (num - 1) % 5 / 5f * getWidth();
-            float top = ((num - 1) / 5) * getWidth() / 5f + getWidth();
+            float top = ((num - 1) / 5f) * getWidth() / 5f + getWidth();
             float textHeight = paint.descent() - paint.ascent();
             float textOffset = textHeight / 2 - paint.descent();
             RectFloat bounds = new RectFloat(left, top, left + wMenu, top + wMenu);
@@ -249,7 +247,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
         initData.clear();
         Map<String, Integer> initMap;
         if (TextTool.isNullOrEmpty(initJson)) {
-            initMap = Sudoku.gen();
+            initMap = Sudoku.INSTANCE.gen();
         } else {
             Type type = new TypeToken<HashMap<String, Integer>>() {
             }.getType();
@@ -309,6 +307,9 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
 
     @Override
     public boolean onTouchEvent(Component component, TouchEvent event) {
+        if (component != this) {
+            return false;
+        }
         if (event.getAction() == TouchEvent.POINT_MOVE) {
             return false;
         }
@@ -397,7 +398,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
         }
         if (event.getAction() == TouchEvent.PRIMARY_POINT_UP) {
             if ((fillData.size() + initData.size()) >= 81) {
-                Map<String, Integer> solvedData = new HashMap<String, Integer>();
+                Map<String, Integer> solvedData = new HashMap<>();
                 solvedData.putAll(initData);
                 solvedData.putAll(fillData);
                 if (solvedData.size() >= 81) {
@@ -412,7 +413,7 @@ public class SudokuComponent extends Component implements Component.DrawTask, Co
 
 
     private void checkSudoku(Map<String, Integer> data) {
-        if (Sudoku.check(data)) {
+        if (data != null && Sudoku.INSTANCE.check((HashMap<String, Integer>) data)) {
             new ToastDialog(getContext())
                     .setText(getContext().getString(ResourceTable.String_solved))
                     .setAlignment(LayoutAlignment.CENTER)
